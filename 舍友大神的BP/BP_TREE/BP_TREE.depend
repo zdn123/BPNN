@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1475333154 source:c:\software\codeblocks\file\bp_tree\bp.cpp
+	<cstdio>
+	<cstdlib>
+	<cmath>
+	<cstring>
+	<time.h>
+
+1475334114 source:c:\software\codeblocks\file\bp_tree\main.cpp
+	<iostream>
+	"BP.cpp"
+
+1475333154 c:\software\codeblocks\file\bp_tree\bp.cpp
+	<cstdio>
+	<cstdlib>
+	<cmath>
+	<cstring>
+	<time.h>
+
