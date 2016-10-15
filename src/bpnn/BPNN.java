@@ -1,6 +1,7 @@
 package bpnn;
 
 import bpnn.DataSet.DataSet;
+import bpnn.function.ActivateFunction;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -31,7 +32,9 @@ public class BPNN {
     public int nmaxtrainnumber=0;
 
     public ArrayList errorlist;
-    public BPNN(int maxIter, double minError, String netStructure, double speed, double momentum) {
+
+    public ActivateFunction activateFunction;
+    public BPNN(int maxIter, double minError, String netStructure, double speed, double momentum, ActivateFunction activateFunction) {
         this.maxIter = maxIter;
         this.minError = minError;
         this.netStructure = netStructure;
@@ -42,7 +45,10 @@ public class BPNN {
 
         error=Double.MAX_VALUE;
 
+        this.activateFunction=activateFunction;
+
         divideStructure(netStructure);
+
     }
 
     void divideStructure(String netStructure){
@@ -53,9 +59,16 @@ public class BPNN {
         int iNumber= Integer.parseInt(ss[0]);
         layers[0]=new InputLayer(iNumber,0);
 
-        for(int i=1;i<layerNumber;i++){
-            int n=Integer.parseInt(ss[i]);
-            layers[i]=new CalculateableLayer(n,i,layers[i-1].nodeNumber);
+        if(activateFunction==null){
+            for(int i=1;i<layerNumber;i++){
+                int n=Integer.parseInt(ss[i]);
+                layers[i]=new CalculateableLayer(n,i,layers[i-1].nodeNumber);
+            }
+        }else{
+            for(int i=1;i<layerNumber;i++){
+                int n=Integer.parseInt(ss[i]);
+                layers[i]=new CalculateableLayer(n,i,layers[i-1].nodeNumber,activateFunction);
+            }
         }
 
         xnumber=iNumber;
@@ -84,13 +97,14 @@ public class BPNN {
 
                 setOutputAverageError(datacount);
                 backward();
+                refreshNet();
             }
             error/=(dataNumber*2.0);
 
             errorlist.add(error);
             System.out.println(error);
             //然后刷新网络的结构
-            refreshNet();
+            //refreshNet();
 
             nmaxtrainnumber++;
             //--10.2--
@@ -242,7 +256,10 @@ public class BPNN {
         Layer outputLayer=layers[layerNumber-1];
         for(int nodeCount=0;nodeCount<outputLayer.nodeNumber;nodeCount++){
             CalculateableNode node = (CalculateableNode) outputLayer.nodes[nodeCount];
-            node.averageError+=(calculateSingleOutputAverageError(datacount,nodeCount)/dataNumber);
+//            node.averageError+=(calculateSingleOutputAverageError(datacount,nodeCount)/dataNumber);
+            //2016-10-15
+            node.averageError=(calculateSingleOutputAverageError(datacount,nodeCount)/dataNumber);
+            //
         }
     }
 
@@ -257,7 +274,10 @@ public class BPNN {
             CalculateableNode nnode= (CalculateableNode) nextlayer.nodes[nnodec];
             sum+=(nnode.averageError*nnode.W[nodecount]);
         }
-        node.averageError+=sum*node.derivative/dataNumber;
+        //node.averageError+=sum*node.derivative/dataNumber;
+        //2016-10-15
+        node.averageError=sum*node.derivative/dataNumber;
+        //
         return node.averageError;
     }
 
@@ -268,11 +288,21 @@ public class BPNN {
             for(int nodecount=0;nodecount<layer.nodeNumber;nodecount++){
                 CalculateableNode node= (CalculateableNode) layer.nodes[nodecount];
                 for(int i=0;i<node.weightNumber;i++){
-                    node.incrementW[i]=speed*node.averageError*lastlayer.nodes[i].x+momentum*node.incrementW[i];
-                    node.W[i]+=node.incrementW[i];
+//                    node.incrementW[i]=speed*node.averageError*lastlayer.nodes[i].x+momentum*node.incrementW[i];
+//                    node.W[i]+=node.incrementW[i];
+                    //2016-10-15
+                    double change=node.averageError*lastlayer.nodes[i].x;
+                    node.W[i]+=(speed*change+momentum*node.incrementW[i]);
+                    node.incrementW[i]=change;
+                    //
                 }
-                node.incrementB=speed*node.averageError+momentum*node.incrementB;
-                node.b+=node.incrementB;
+//                node.incrementB=speed*node.averageError+momentum*node.incrementB;
+//                node.b+=node.incrementB;
+                //2016-10-15
+                double change=node.averageError;
+                node.b+=(speed*change+momentum*node.incrementB);
+                node.incrementB=change;
+                //
             }
         }
     }

@@ -3,6 +3,7 @@ package bpnn;
 import bpnn.Util.Util;
 import bpnn.function.ActivateFunction;
 import bpnn.function.Sigmord;
+import bpnn.function.Tanh;
 
 /**
  * Created by zsh96 on 2016/10/1.
@@ -10,7 +11,7 @@ import bpnn.function.Sigmord;
 public class CalculateableNode extends Node{
     public int weightNumber;
     public double[] W;
-    public double b=1;//阈值
+    public double b=0;//阈值
 
     public double averageError;
     public double[] incrementW;
@@ -26,7 +27,8 @@ public class CalculateableNode extends Node{
     public CalculateableNode(int nodeNumber, int weightNumber) {
         super(nodeNumber);
         ActivateFunction sigmord=new Sigmord();
-        this.activateFunction=sigmord;
+        ActivateFunction tanh=new Tanh();
+        this.activateFunction=tanh;
         this.weightNumber = weightNumber;
 
         averageError=Double.MAX_VALUE;
@@ -43,7 +45,7 @@ public class CalculateableNode extends Node{
 
     public double activate(double[] X) throws Exception {
         double h= Util.dot(X,W);
-//        h+=b;
+        h+=b;
         this.x=activateFunction.calculate(h);
         this.derivative=activateFunction.derivativeCalculate(h);
         return this.x;
