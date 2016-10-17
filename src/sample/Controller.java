@@ -6,6 +6,7 @@ import bpnn.DataSet.DataSet;
 import bpnn.function.ActivateFunction;
 import bpnn.function.Sigmord;
 import bpnn.function.Tanh;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -24,6 +25,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.io.*;
 
 public class Controller {
@@ -323,6 +327,12 @@ public class Controller {
                     Main.bpnn.testrate=7;
             }
         });
+        manager=new ScriptEngineManager();
+        engine=manager.getEngineByName("nashorn");
+        expressionText.setText("x0=uniform(1,10);\n" +
+                "x1=uniform(2,8);\n" +
+                "y0=x0+x1;\n" +
+                "y1=x0-x1;");
     }
     class TestData{
         public SimpleDoubleProperty[] doubleProperties;
@@ -341,6 +351,81 @@ public class Controller {
                 doubleProperties[dataSet.xn+2*i+1]=new SimpleDoubleProperty();
                 doubleProperties[dataSet.xn+2*i+1].set(dataSet.testPredicts.get(n)[i]);
             }
+        }
+    }
+
+    @FXML
+    TextField dataCount;
+    @FXML
+    TextField inputCount;
+    @FXML
+    TextField outputCount;
+    @FXML
+    TextField noise;
+    @FXML
+    TextArea expressionText;
+
+    ScriptEngineManager manager;
+    ScriptEngine engine;
+
+    @FXML
+    void generateDataSet(){
+        int datacount= Integer.parseInt(dataCount.getText());
+        int inputcount=Integer.parseInt(inputCount.getText());
+        int outputcount=Integer.parseInt(outputCount.getText());
+        double dnoise=Double.parseDouble(noise.getText());
+
+        try {
+            engine.eval("function uniform(min,max)\n" +
+                    "{\n" +
+                    "\treturn min+Math.random()*(max-min);\n" +
+                    "}\n" +
+                    "function randGaussian(m)\n" +
+                    "{\n" +
+                    "\tsum=0;\n" +
+                    "\tfor(var i=0;i<m;i++){\n" +
+                    "\t\tsum+=(Math.random()-1/2);\n" +
+                    "\t}\n" +
+                    "\treturn Math.sqrt(12/m)*sum;\n" +
+                    "}\n" +
+                    "function gaussian(m,a)\n" +
+                    "{\n" +
+                    "\treturn randGaussian(10000)*a+m;\n" +
+                    "}");
+//            double result=(double)engine.eval("gaussian(10,3)");
+            DataSet dataSet=new DataSet(inputcount,outputcount);
+            for(int i=0;i<datacount;i++){
+                engine.eval(expressionText.getText());
+
+                double[] inputs=new double[inputcount];
+                for(int j=0;j<inputcount;j++){
+                    double x= (double) engine.get("x"+j);
+                    inputs[j]=x;
+                }
+                double[] outputs=new double[outputcount];
+                for(int j=0;j<outputcount;j++){
+                    double y=(double)engine.get("y"+j);
+                    outputs[j]=y+Main.bpnn.random.nextDouble()*dnoise;
+                }
+                DataGroup dg=new DataGroup(inputcount,outputcount);
+                dg.inputs=inputs;
+                dg.outputs=outputs;
+                dataSet.trainGroups.add(dg);
+            }
+
+            for(int i=0;i<dataSet.trainGroups.size();i++){
+                System.out.print("X= ");
+                for(int j=0;j<dataSet.trainGroups.get(i).inputs.length;j++){
+                    System.out.print(dataSet.trainGroups.get(i).inputs[j]+"\t");
+                }
+                System.out.print("      Y= ")
+                ;for(int j=0;j<dataSet.trainGroups.get(i).outputs.length;j++){
+                    System.out.print(dataSet.trainGroups.get(i).outputs[j]+"\t");
+                }
+                System.out.println();
+            }
+        } catch (ScriptException e) {
+            e.printStackTrace();
         }
     }
 }

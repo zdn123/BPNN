@@ -103,6 +103,23 @@
                                  </children></AnchorPane>
                             </content>
                         </Tab>
+                        <Tab closable="false" text="生成数据集">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                 <children>
+                                    <TextField fx:id="dataCount" layoutX="305.0" layoutY="25.0" text="100" />
+                                    <TextArea fx:id="expressionText" layoutX="47.0" layoutY="223.0" prefHeight="200.0" prefWidth="622.0" />
+                                    <TextField fx:id="inputCount" layoutX="305.0" layoutY="74.0" text="2" />
+                                    <TextField fx:id="outputCount" layoutX="305.0" layoutY="125.0" text="2" />
+                                    <Label layoutX="169.0" layoutY="31.0" text="数据个数：" />
+                                    <Label layoutX="169.0" layoutY="80.0" text="输入数量：" />
+                                    <Label layoutX="169.0" layoutY="131.0" text="输出数量：" />
+                                    <Button layoutX="304.0" layoutY="435.0" mnemonicParsing="false" onMouseClicked="#generateDataSet" text="生成" />
+                                    <Label layoutX="187.0" layoutY="181.0" text="噪音：" />
+                                    <TextField fx:id="noise" layoutX="305.0" layoutY="175.0" text="0.01" />
+                                 </children></AnchorPane>
+                            </content>
+                        </Tab>
                     </tabs>
                   </TabPane>
                </children>
