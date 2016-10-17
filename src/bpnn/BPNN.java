@@ -15,7 +15,8 @@ public class BPNN {
     Layer[] layers;
     int layerNumber;
 
-    public double error;
+    public double trainError;
+    public double testError;
 
     int maxIter;
     double minError;
@@ -25,13 +26,17 @@ public class BPNN {
     double speed,momentum;
 
     public DataSet dataSet;
-    int dataNumber;
+    int trainDataNumber;
+    int testDataNumber;
 
     public int xnumber,ynumber;
 
     public int nmaxtrainnumber=0;
 
-    public ArrayList errorlist;
+    public ArrayList trainErrorlist;
+    public ArrayList testErrorlist;
+
+    public int testrate;
 
     public ActivateFunction activateFunction;
     public BPNN(int maxIter, double minError, String netStructure, double speed, double momentum, ActivateFunction activateFunction) {
@@ -41,9 +46,11 @@ public class BPNN {
         this.speed = speed;
         this.momentum = momentum;
 
-        this.errorlist=new ArrayList();
+        this.trainErrorlist =new ArrayList();
+        this.testErrorlist=new ArrayList();
 
-        error=Double.MAX_VALUE;
+        trainError =Double.MAX_VALUE;
+        testError=Double.MAX_VALUE;
 
         this.activateFunction=activateFunction;
 
@@ -77,32 +84,46 @@ public class BPNN {
 
     public void train(DataSet dataSet) throws Exception {
 
-        this.dataNumber=dataSet.groups.size();
+        this.trainDataNumber =dataSet.trainGroups.size();
+        this.testDataNumber=dataSet.testGroups.size();
 
         for(int iter=0;iter<maxIter;iter++){
             //--10.2-每组数据都进行数据前馈和误差反馈
-            if(error<=minError)
+            if(trainError <=minError)
                 break;
 
             clearAverageError();
-            error=0;
-            for(int datacount=0;datacount<dataNumber;datacount++){
-                double[] dX=dataSet.groups.get(datacount).inputs;
+            trainError =0;
+            for(int datacount = 0; datacount< trainDataNumber; datacount++){
+                double[] dX=dataSet.trainGroups.get(datacount).inputs;
                 for(int i=0;i<dX.length;i++){
                     InputNode node = (InputNode) layers[0].nodes[i];
                     node.x=dX[i];
                 }
                 _forward();
-                error+=calculateSingleError(datacount);
+                trainError +=calculateSingleError(datacount);
 
                 setOutputAverageError(datacount);
                 backward();
                 refreshNet();
             }
-            error/=(dataNumber*2.0);
+            trainError /=(trainDataNumber *2.0);
+            trainErrorlist.add(trainError);
 
-            errorlist.add(error);
-            System.out.println(error);
+            testError=0;
+            for(int datacount=0;datacount<testDataNumber;datacount++){
+                double[] dX=dataSet.testGroups.get(datacount).inputs;
+                for(int i=0;i<dX.length;i++){
+                    InputNode node = (InputNode) layers[0].nodes[i];
+                    node.x=dX[i];
+                }
+                _forward();
+                testError +=calculateSingleError(datacount);
+            }
+            testError/=(testDataNumber*2.0);
+            testErrorlist.add(testError);
+
+            System.out.println(trainError);
             //然后刷新网络的结构
             //refreshNet();
 
@@ -143,10 +164,10 @@ public class BPNN {
 
 //    public void forward() throws Exception {
 //        clearOutputAverageError();
-//        error=0;
-//        for(int datacount=0;datacount<dataNumber;datacount++){
+//        trainError=0;
+//        for(int datacount=0;datacount<trainDataNumber;datacount++){
 //            //--
-//            double[] dX=dataSet.groups.get(datacount).inputs;
+//            double[] dX=dataSet.trainGroups.get(datacount).inputs;
 //            for(int i=0;i<dX.length;i++){
 //                InputNode node = (InputNode) layers[0].nodes[i];
 //                node.x=dX[i];
@@ -162,20 +183,20 @@ public class BPNN {
 //                    node.activate(X);
 //                }
 //            }
-//            error+=calculateSingleError(datacount);
+//            trainError+=calculateSingleError(datacount);
 //
 //            //输出层每个节点的均差
 //            setOutputAverageError(datacount);
 //
 //        }
-//        error/=(dataNumber*2.0);//总平均误差
-//        errorlist.add(error);
+//        trainError/=(trainDataNumber*2.0);//总平均误差
+//        trainErrorlist.add(trainError);
 //
-//        System.out.println(error);
+//        System.out.println(trainError);
 //        Layer outputLayer=layers[layerNumber-1];
 //        for(int nodeCount=0;nodeCount<outputLayer.nodeNumber;nodeCount++){
 //            CalculateableNode node = (CalculateableNode) outputLayer.nodes[nodeCount];
-//            node.averageError/=dataNumber;
+//            node.averageError/=trainDataNumber;
 //        }
 //    }
 
@@ -196,7 +217,7 @@ public class BPNN {
         double sumError=0;
         Layer outputLayer=layers[layerNumber-1];
         for(int i=0;i<outputLayer.nodeNumber;i++){
-            double dy=dataSet.groups.get(dataCount).outputs[i];
+            double dy=dataSet.trainGroups.get(dataCount).outputs[i];
             double oy=outputLayer.nodes[i].x;
             sumError+=Math.pow(dy-oy,2.0);
         }
@@ -232,7 +253,7 @@ public class BPNN {
 
     double calculateSingleOutputAverageError(int dataCount,int nodeNumber){
         Layer outputLayer=layers[layerNumber-1];
-        double dy=dataSet.groups.get(dataCount).outputs[nodeNumber];
+        double dy=dataSet.trainGroups.get(dataCount).outputs[nodeNumber];
         CalculateableNode ynode= (CalculateableNode) outputLayer.nodes[nodeNumber];
         double oy=ynode.x;
         return (dy-oy)*ynode.derivative;
@@ -256,9 +277,9 @@ public class BPNN {
         Layer outputLayer=layers[layerNumber-1];
         for(int nodeCount=0;nodeCount<outputLayer.nodeNumber;nodeCount++){
             CalculateableNode node = (CalculateableNode) outputLayer.nodes[nodeCount];
-//            node.averageError+=(calculateSingleOutputAverageError(datacount,nodeCount)/dataNumber);
+//            node.averageError+=(calculateSingleOutputAverageError(datacount,nodeCount)/trainDataNumber);
             //2016-10-15
-            node.averageError=(calculateSingleOutputAverageError(datacount,nodeCount)/dataNumber);
+            node.averageError=(calculateSingleOutputAverageError(datacount,nodeCount)/ trainDataNumber);
             //
         }
     }
@@ -274,9 +295,9 @@ public class BPNN {
             CalculateableNode nnode= (CalculateableNode) nextlayer.nodes[nnodec];
             sum+=(nnode.averageError*nnode.W[nodecount]);
         }
-        //node.averageError+=sum*node.derivative/dataNumber;
+        //node.averageError+=sum*node.derivative/trainDataNumber;
         //2016-10-15
-        node.averageError=sum*node.derivative/dataNumber;
+        node.averageError=sum*node.derivative/ trainDataNumber;
         //
         return node.averageError;
     }

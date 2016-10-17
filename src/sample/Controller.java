@@ -8,18 +8,20 @@ import bpnn.function.Sigmord;
 import bpnn.function.Tanh;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.*;
 import javafx.fxml.FXML;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 
-import javax.swing.table.*;
 import java.io.*;
-import java.util.Scanner;
 
 public class Controller {
     @FXML
@@ -46,6 +48,8 @@ public class Controller {
     ComboBox activateChoose;
     @FXML
     TableView compareTable;
+    @FXML
+    ComboBox testSelect;
 
     LineChart<Number,Number>lineChart;
 
@@ -122,13 +126,19 @@ public class Controller {
                 for(int i=dataSet.xn;i<dataSet.xn+dataSet.yn;i++){
                     dataGroup.outputs[i-dataSet.xn]=Double.parseDouble(ss[i]);
                 }
-                dataSet.groups.add(dataGroup);
+                dataSet.trainGroups.add(dataGroup);
 
                 trainset+=line;
                 trainset+="\n";
-
-                Main.bpnn.dataSet=dataSet;
             }
+            Main.bpnn.dataSet=dataSet;
+
+            if(Main.bpnn.testrate>=dataSet.trainGroups.size()){
+                Main.bpnn.testrate=0;
+            }
+            dataSet.sortTrainGroup();
+            dataSet.generateTestGroups(Main.bpnn.testrate);
+
             trainSetTextArea.appendText(trainset);
             Main.bpnn.train(Main.bpnn.dataSet);
 
@@ -177,7 +187,7 @@ public class Controller {
 
                 linenumber++;
             }
-            predictSetTextArea.appendText("最终训练次数："+Main.bpnn.nmaxtrainnumber+"\n"+"最终误差："+Main.bpnn.error+"\n");
+            predictSetTextArea.appendText("最终训练次数："+Main.bpnn.nmaxtrainnumber+"\n"+"最终误差："+Main.bpnn.trainError +"\n");
             //--
 
         } catch (FileNotFoundException e) {
@@ -193,6 +203,7 @@ public class Controller {
     void beginDraw(){
         tabPane.getSelectionModel().select(2);
         XYChart.Series series=new XYChart.Series();
+
         //series.getChart().set
 
 
@@ -200,8 +211,8 @@ public class Controller {
 //        Thread thread=new Thread(new Runnable() {
 //            @Override
 //            public void run() {
-//                for(int i=0;i<Main.bpnn.errorlist.size();i++){
-//                    series.getData().add(new XYChart.Data(i,Main.bpnn.errorlist.get(i)));
+//                for(int i=0;i<Main.bpnn.trainErrorlist.size();i++){
+//                    series.getData().add(new XYChart.Data(i,Main.bpnn.trainErrorlist.get(i)));
 //                    try {
 //                        Thread.sleep(300);
 //                    } catch (InterruptedException e) {
@@ -212,10 +223,18 @@ public class Controller {
 //        });
 //        thread.start();
 //        //
-        for(int i=0;i<Main.bpnn.errorlist.size();i++){
-            series.getData().add(new XYChart.Data(i,Main.bpnn.errorlist.get(i)));
+        for(int i = 0; i<Main.bpnn.trainErrorlist.size(); i++){
+            series.getData().add(new XYChart.Data(i,Main.bpnn.trainErrorlist.get(i)));
         }
         lineChart.getData().add(series);
+
+        if(Main.bpnn.testrate!=0){
+            XYChart.Series testSeries=new XYChart.Series();
+            for(int i=0;i<Main.bpnn.testErrorlist.size();i++){
+                testSeries.getData().add(new XYChart.Data(i,Main.bpnn.testErrorlist.get(i)));
+            }
+            lineChart.getData().add(testSeries);
+        }
     }
 
     @FXML
@@ -233,5 +252,37 @@ public class Controller {
         lineChart=new LineChart<Number, Number>(xAxis,yAxis);
         lineChart.setCreateSymbols(false);
         errorLineChartPane.getChildren().add(lineChart);
+
+        ObservableList<String> options1 =
+                FXCollections.observableArrayList(
+                        "1/20",
+                        "1/10",
+                        "1/7",
+                        "1/5",
+                        "1/3"
+                );
+        testSelect.setItems(options1);
+        testSelect.setOnAction((Event ev)->{
+            int n=testSelect.getSelectionModel().getSelectedIndex();
+            switch (n){
+                case 0:
+                    Main.bpnn.testrate=20;
+                    break;
+                case 1:
+                    Main.bpnn.testrate=10;
+                    break;
+                case 2:
+                    Main.bpnn.testrate=7;
+                    break;
+                case 3:
+                    Main.bpnn.testrate=5;
+                    break;
+                case 4:
+                    Main.bpnn.testrate=3;
+                    break;
+                default:
+                    Main.bpnn.testrate=7;
+            }
+        });
     }
 }
