@@ -15,13 +15,26 @@ public class JsTest {
         engine.put("a",4);
         engine.put("b",2);
         try {
-            double result=(double)engine.eval("Math.sin(a+b)");
+            engine.eval("function uniform(min,max)\n" +
+                    "{\n" +
+                    "\treturn min+Math.random()*(max-min);\n" +
+                    "}\n" +
+                    "function randGaussian(m)\n" +
+                    "{\n" +
+                    "\tsum=0;\n" +
+                    "\tfor(var i=0;i<m;i++){\n" +
+                    "\t\tsum+=(Math.random()-1/2);\n" +
+                    "\t}\n" +
+                    "\treturn Math.sqrt(12/m)*sum;\n" +
+                    "}\n" +
+                    "function gaussian(m,a)\n" +
+                    "{\n" +
+                    "\treturn randGaussian(10000)*a+m;\n" +
+                    "}");
+            double result=(double)engine.eval("gaussian(10,3)");
             System.out.println(result);
         } catch (ScriptException e) {
             e.printStackTrace();
         }
     }
-
-
-
 }

@@ -2,7 +2,10 @@ package bpnn.DataSet;
 
 import sample.Main;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created by zsh96 on 2016/10/1.
@@ -10,6 +13,9 @@ import java.util.ArrayList;
 public class DataSet {
     public ArrayList<DataGroup> trainGroups;
     public ArrayList<DataGroup> testGroups;
+    public ArrayList<double[]> testPredicts;
+    public ArrayList<DataGroup> oldtestGroups;
+    public ArrayList<DataGroup> oldtrainGroups;
     public int xn,yn;
 
     public double maxX[];
@@ -53,17 +59,23 @@ public class DataSet {
             return;
         int k=trainGroups.size()/testrate;
         int i= Main.bpnn.random.nextInt(k);
-        int c=trainGroups.size();
+        int c=trainGroups.size()-1;
         for(;i<c;i+=k){
             testGroups.add(trainGroups.get(c-i));
             trainGroups.remove(c-i);
         }
+        Collections.reverse(testGroups);
+
+        testPredicts=new ArrayList<>();
     }
     public void generateOne(double maxx,double minx,double maxy,double miny){
         this.omaxX=maxx;
         this.omaxY=maxy;
         this.ominX=minx;
         this.ominY=miny;
+
+        oldtrainGroups= (ArrayList<DataGroup>) trainGroups.clone();
+        oldtestGroups= (ArrayList<DataGroup>) testGroups.clone();
 
         findMaxMin();
         for(int i=0;i<trainGroups.size();i++){
@@ -81,6 +93,9 @@ public class DataSet {
         this.omaxY=1;
         this.ominX=0;
         this.ominY=0;
+
+        oldtrainGroups= (ArrayList<DataGroup>) trainGroups.clone();
+        oldtestGroups= (ArrayList<DataGroup>) testGroups.clone();
 
         findMaxMin();
         for(int i=0;i<trainGroups.size();i++){

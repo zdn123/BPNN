@@ -6,6 +6,8 @@ import bpnn.DataSet.DataSet;
 import bpnn.function.ActivateFunction;
 import bpnn.function.Sigmord;
 import bpnn.function.Tanh;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.*;
@@ -20,6 +22,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import javafx.util.Callback;
 
 import java.io.*;
 
@@ -47,7 +50,7 @@ public class Controller {
     @FXML
     ComboBox activateChoose;
     @FXML
-    TableView compareTable;
+    TableView<TestData> compareTable;
     @FXML
     ComboBox testSelect;
 
@@ -74,7 +77,7 @@ public class Controller {
                 activateFunction=new Tanh();
                 break;
             default:
-                activateFunction=new Sigmord();
+                activateFunction=new Tanh();
         }
 
         trainSetTextArea.setText("");
@@ -85,11 +88,36 @@ public class Controller {
 
         compareTable.getColumns().clear();
         for(int i=0;i<Main.bpnn.xnumber;i++){
-            compareTable.getColumns().add(new TableColumn("x"+i));
+            TableColumn tc=new TableColumn("x"+i);
+            int finalI = i;
+            tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TestData,Double>, ObservableValue<Number>>() {
+                @Override
+                public ObservableValue<Number> call(TableColumn.CellDataFeatures<TestData,Double> param) {
+                    return param.getValue().doubleProperties[finalI];
+                }
+            });
+            compareTable.getColumns().add(tc);
+
         }
         for(int i=0;i<Main.bpnn.ynumber;i++){
-            compareTable.getColumns().add(new TableColumn("dy"+i));
-            compareTable.getColumns().add(new TableColumn("oy"+i));
+            TableColumn tc=new TableColumn("dy"+i);
+            int finalI = i;
+            tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TestData,Double>, ObservableValue<Number>>() {
+                @Override
+                public ObservableValue<Number> call(TableColumn.CellDataFeatures<TestData,Double> param) {
+                    return param.getValue().doubleProperties[2*finalI+Main.bpnn.xnumber];
+                }
+            });
+            compareTable.getColumns().add(tc);
+            TableColumn tc1=new TableColumn("dy"+i);
+            int finalI1 = i;
+            tc1.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TestData,Double>, ObservableValue<Number>>() {
+                @Override
+                public ObservableValue<Number> call(TableColumn.CellDataFeatures<TestData,Double> param) {
+                    return param.getValue().doubleProperties[2*finalI1+1+Main.bpnn.ynumber];
+                }
+            });
+            compareTable.getColumns().add(tc1);
         }
     }
 
@@ -137,13 +165,21 @@ public class Controller {
                 Main.bpnn.testrate=0;
             }
             dataSet.sortTrainGroup();
-
-            dataSet.generateOne();//归一化
-
             dataSet.generateTestGroups(Main.bpnn.testrate);
+            dataSet.generateOne();//归一化
 
             trainSetTextArea.appendText(trainset);
             Main.bpnn.train(Main.bpnn.dataSet);
+
+            if(Main.bpnn.testrate!=0){
+                Main.bpnn.getpredictTest();
+                DataSet ds=Main.bpnn.dataSet;
+                compareTable.getItems().clear();
+                for(int i=0;i<ds.testGroups.size();i++){
+                    TestData td=new TestData(dataSet,i);
+                    compareTable.getItems().add(td);
+                }
+            }
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -287,5 +323,24 @@ public class Controller {
                     Main.bpnn.testrate=7;
             }
         });
+    }
+    class TestData{
+        public SimpleDoubleProperty[] doubleProperties;
+
+        public TestData(DataSet dataSet,int n) {
+            this.doubleProperties= new SimpleDoubleProperty[dataSet.xn + 2 * dataSet.yn];
+            for(int i=0;i<dataSet.xn;i++){
+                doubleProperties[i]=new SimpleDoubleProperty();
+                doubleProperties[i].set(dataSet.oldtestGroups.get(n).inputs[i]);
+            }
+            for(int i=0;i<dataSet.yn;i++){
+                doubleProperties[dataSet.xn+2*i]=new SimpleDoubleProperty();
+                doubleProperties[dataSet.xn+2*i].set(dataSet.oldtestGroups.get(n).outputs[i]);
+            }
+            for(int i=0;i<dataSet.yn;i++){
+                doubleProperties[dataSet.xn+2*i+1]=new SimpleDoubleProperty();
+                doubleProperties[dataSet.xn+2*i+1].set(dataSet.testPredicts.get(n)[i]);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ package bpnn.DataSet;
 public class DataGroup {
     public double[] inputs;
     public double[] outputs;
+
     int xn,yn;
 
     public DataGroup(int xn, int yn) {
