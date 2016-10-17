@@ -137,6 +137,9 @@ public class Controller {
                 Main.bpnn.testrate=0;
             }
             dataSet.sortTrainGroup();
+
+            dataSet.generateOne();//归一化
+
             dataSet.generateTestGroups(Main.bpnn.testrate);
 
             trainSetTextArea.appendText(trainset);

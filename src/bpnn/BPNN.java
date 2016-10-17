@@ -140,6 +140,8 @@ public class BPNN {
 
         double[] Y=new double[nY];
 
+        X=generateOne(X);
+
         for(int i=0;i<X.length;i++){
             InputNode node = (InputNode) layers[0].nodes[i];
             node.x=X[i];
@@ -158,6 +160,19 @@ public class BPNN {
         Layer outputlayer=layers[layerNumber-1];
         for(int i=0;i<outputlayer.nodeNumber;i++){
             Y[i]=outputlayer.nodes[i].x;
+        }
+        Y=degenerateOne(Y);
+        return Y;
+    }
+    public double[] generateOne(double[] X){
+        for(int i=0;i<X.length;i++){
+            X[i]=(X[i]-dataSet.minX[i])/(dataSet.maxX[i]-dataSet.minX[i])*(dataSet.omaxX-dataSet.ominX)+dataSet.ominX;
+        }
+        return X;
+    }
+    public double[] degenerateOne(double[] Y){
+        for(int i=0;i<Y.length;i++){
+            Y[i]=(Y[i]-dataSet.ominX)/(dataSet.omaxX-dataSet.ominX)*(dataSet.maxX[i]-dataSet.minX[i])+dataSet.minX[i];
         }
         return Y;
     }

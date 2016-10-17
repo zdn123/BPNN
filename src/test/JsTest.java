@@ -11,12 +11,11 @@ public class JsTest {
 
     public static void main(String[] args){
         ScriptEngineManager manager=new ScriptEngineManager();
-        ScriptEngine engine=manager.getEngineByName("javascript");
+        ScriptEngine engine=manager.getEngineByName("nashorn");
         engine.put("a",4);
         engine.put("b",2);
         try {
-            engine.eval("import Math");
-            double result=(double)engine.eval("sin(a+b)");
+            double result=(double)engine.eval("Math.sin(a+b)");
             System.out.println(result);
         } catch (ScriptException e) {
             e.printStackTrace();
