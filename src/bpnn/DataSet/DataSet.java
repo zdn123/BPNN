@@ -31,6 +31,8 @@ public class DataSet {
         this.yn = yn;
         trainGroups =new ArrayList<>();
         testGroups=new ArrayList<>();
+        oldtrainGroups=new ArrayList<>();
+        oldtestGroups=new ArrayList<>();
 
         maxX=new double[xn];
         minX=new double[xn];
@@ -94,8 +96,22 @@ public class DataSet {
         this.ominX=0;
         this.ominY=0;
 
-        oldtrainGroups= (ArrayList<DataGroup>) trainGroups.clone();
-        oldtestGroups= (ArrayList<DataGroup>) testGroups.clone();
+//        oldtrainGroups= (ArrayList<DataGroup>) trainGroups.clone();
+        for (DataGroup dg: trainGroups) {
+            try {
+                oldtrainGroups.add(dg.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
+//        oldtestGroups= (ArrayList<DataGroup>) testGroups.clone();
+        for (DataGroup dg: testGroups) {
+            try {
+                oldtestGroups.add(dg.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
 
         findMaxMin();
         for(int i=0;i<trainGroups.size();i++){
@@ -124,6 +140,16 @@ public class DataSet {
             }
             for(int j=0;j<yn;j++){
                 trainGroups.get(i).outputs[j]=(trainGroups.get(i).outputs[j]-ominY)/(omaxY-ominY)*(maxY[j]-minY[j])+minY[j];
+            }
+        }
+
+        for(int i=0;i<testGroups.size();i++){
+            for(int j=0;j<xn;j++){
+                testGroups.get(i).inputs[j]=(testGroups.get(i).inputs[j]-ominX)/(omaxX-ominX)*(maxX[j]-minX[j])+minX[j];
+
+            }
+            for(int j=0;j<yn;j++){
+                testGroups.get(i).outputs[j]=(testGroups.get(i).outputs[j]-ominY)/(omaxY-ominY)*(maxY[j]-minY[j])+minY[j];
             }
         }
     }

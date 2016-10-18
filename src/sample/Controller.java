@@ -114,7 +114,7 @@ public class Controller {
                 }
             });
             compareTable.getColumns().add(tc);
-            TableColumn tc1=new TableColumn("dy"+i);
+            TableColumn tc1=new TableColumn("oy"+i);
             int finalI1 = i;
             tc1.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<TestData,Double>, ObservableValue<Number>>() {
                 @Override
@@ -180,7 +180,7 @@ public class Controller {
                 Main.bpnn.getpredictTest();
                 DataSet ds=Main.bpnn.dataSet;
                 compareTable.getItems().clear();
-                for(int i=0;i<ds.testGroups.size();i++){
+                for(int i=0;i<ds.oldtestGroups.size();i++){
                     TestData td=new TestData(dataSet,i);
                     compareTable.getItems().add(td);
                 }

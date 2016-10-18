@@ -341,7 +341,7 @@ public class BPNN {
 
     public void getpredictTest() throws Exception {
         for(int i=0;i<dataSet.testGroups.size();i++){
-            dataSet.testPredicts.add((predict(dataSet.testGroups.get(i).inputs)));
+            dataSet.testPredicts.add((predict(dataSet.oldtestGroups.get(i).inputs)));//testGroups里面是已经归一化的数据，predict也要归一化
         }
     }
 }
