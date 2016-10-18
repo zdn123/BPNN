@@ -1,5 +1,6 @@
 package bpnn;
 
+import bpnn.DataSet.DataGroup;
 import bpnn.DataSet.DataSet;
 import bpnn.function.ActivateFunction;
 
@@ -34,7 +35,7 @@ public class BPNN {
     public ArrayList trainErrorlist;
     public ArrayList testErrorlist;
 
-    public int testrate;
+    public int testrate=7;
 
     public ActivateFunction activateFunction;
     public BPNN(int maxIter, double minError, String netStructure, double speed, double momentum, ActivateFunction activateFunction) {
@@ -96,7 +97,7 @@ public class BPNN {
                     node.x=dX[i];
                 }
                 _forward();
-                trainError +=calculateSingleError(datacount);
+                trainError +=calculateSingleError(datacount,dataSet.trainGroups);
 
                 setOutputAverageError(datacount);
                 backward();
@@ -113,7 +114,7 @@ public class BPNN {
                     node.x=dX[i];
                 }
                 _forward();
-                testError +=calculateSingleError(datacount);
+                testError +=calculateSingleError(datacount,dataSet.testGroups);
             }
             testError/=(dataSet.testGroups.size()*2.0);
             testErrorlist.add(testError);
@@ -223,11 +224,11 @@ public class BPNN {
         }
     }
 
-    double calculateSingleError(int dataCount){
+    double calculateSingleError(int dataCount, ArrayList<DataGroup> groups){
         double sumError=0;
         Layer outputLayer=layers[layerNumber-1];
         for(int i=0;i<outputLayer.nodeNumber;i++){
-            double dy=dataSet.trainGroups.get(dataCount).outputs[i];
+            double dy=groups.get(dataCount).outputs[i];
             double oy=outputLayer.nodes[i].x;
             sumError+=Math.pow(dy-oy,2.0);
         }

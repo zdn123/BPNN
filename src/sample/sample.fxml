@@ -22,13 +22,13 @@
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="548.0" prefWidth="381.0">
                <children>
                   <Label layoutX="50.0" layoutY="43.0" text="网络结构：" />
-                  <TextField fx:id="netStructText" layoutX="140.0" layoutY="37.0" text="1-5-1" />
-                  <TextField fx:id="maxIterText" layoutX="140.0" layoutY="87.0" text="600" />
+                  <TextField fx:id="netStructText" layoutX="140.0" layoutY="37.0" text="2-5-5-2" />
+                  <TextField fx:id="maxIterText" layoutX="140.0" layoutY="87.0" text="1000" />
                   <Label layoutX="14.0" layoutY="93.0" text="最大迭代次数：" />
                   <Label layoutX="50.0" layoutY="144.0" text="最小误差：" />
                   <Label layoutX="50.0" layoutY="195.0" text="学习速率：" />
                   <Label layoutX="50.0" layoutY="242.0" text="动量因子：" />
-                  <TextField fx:id="minErrorText" layoutX="140.0" layoutY="138.0" text="0.02" />
+                  <TextField fx:id="minErrorText" layoutX="140.0" layoutY="138.0" text="0.002" />
                   <TextField fx:id="speedText" layoutX="140.0" layoutY="189.0" text="0.5" />
                   <TextField fx:id="momentumText" layoutX="140.0" layoutY="236.0" text="0.4" />
                   <Button fx:id="initButton" layoutX="150.0" layoutY="293.0" mnemonicParsing="false" onAction="#initNet" prefHeight="36.0" prefWidth="109.0" text="初始化网络" />
@@ -107,16 +107,18 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <TextField fx:id="dataCount" layoutX="305.0" layoutY="25.0" text="100" />
-                                    <TextArea fx:id="expressionText" layoutX="47.0" layoutY="223.0" prefHeight="200.0" prefWidth="622.0" />
-                                    <TextField fx:id="inputCount" layoutX="305.0" layoutY="74.0" text="2" />
-                                    <TextField fx:id="outputCount" layoutX="305.0" layoutY="125.0" text="2" />
-                                    <Label layoutX="169.0" layoutY="31.0" text="数据个数：" />
-                                    <Label layoutX="169.0" layoutY="80.0" text="输入数量：" />
-                                    <Label layoutX="169.0" layoutY="131.0" text="输出数量：" />
-                                    <Button layoutX="304.0" layoutY="435.0" mnemonicParsing="false" onMouseClicked="#generateDataSet" text="生成" />
-                                    <Label layoutX="187.0" layoutY="181.0" text="噪音：" />
-                                    <TextField fx:id="noise" layoutX="305.0" layoutY="175.0" text="0.01" />
+                                    <TextField fx:id="dataCount" layoutX="150.0" layoutY="26.0" text="100" />
+                                    <TextArea fx:id="expressionText" layoutX="403.0" layoutY="14.0" prefHeight="200.0" prefWidth="300.0" />
+                                    <TextField fx:id="inputCount" layoutX="150.0" layoutY="96.0" text="2" />
+                                    <TextField fx:id="outputCount" layoutX="150.0" layoutY="170.0" text="2" />
+                                    <Label layoutX="14.0" layoutY="32.0" text="数据个数：" />
+                                    <Label layoutX="14.0" layoutY="102.0" text="输入数量：" />
+                                    <Label layoutX="14.0" layoutY="176.0" text="输出数量：" />
+                                    <Button layoutX="310.0" layoutY="442.0" mnemonicParsing="false" onMouseClicked="#generateDataSet" text="生成" />
+                                    <TextArea fx:id="displayText" editable="false" layoutX="19.0" layoutY="234.0" prefHeight="191.0" prefWidth="677.0">
+                                       <font>
+                                          <Font name="Arial" size="18.0" />
+                                       </font></TextArea>
                                  </children></AnchorPane>
                             </content>
                         </Tab>

@@ -60,7 +60,7 @@ public class DataSet {
         int k=trainGroups.size()/testrate;
         int i= Main.bpnn.random.nextInt(k);
         int c=trainGroups.size()-1;
-        for(;i<c;i+=k){
+        for(;i<c;i+=testrate){
             testGroups.add(trainGroups.get(c-i));
             trainGroups.remove(c-i);
         }
@@ -104,6 +104,14 @@ public class DataSet {
             }
             for(int j=0;j<yn;j++){
                 trainGroups.get(i).outputs[j]=(trainGroups.get(i).outputs[j]-minY[j])/(maxY[j]-minY[j])*(omaxY-ominY)+ominY;
+            }
+        }
+        for(int i=0;i<testGroups.size();i++){
+            for(int j=0;j<xn;j++){
+                testGroups.get(i).inputs[j]=(testGroups.get(i).inputs[j]-minX[j])/(maxX[j]-minX[j])*(omaxX-ominX)+ominX;
+            }
+            for(int j=0;j<yn;j++){
+                testGroups.get(i).outputs[j]=(testGroups.get(i).outputs[j]-minY[j])/(maxY[j]-minY[j])*(omaxY-ominY)+ominY;
             }
         }
     }

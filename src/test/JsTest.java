@@ -33,6 +33,8 @@ public class JsTest {
                     "}");
             double result=(double)engine.eval("gaussian(10,3)");
             System.out.println(result);
+            String[] s="\t  32  \t".split("\t");
+            System.out.println(s);
         } catch (ScriptException e) {
             e.printStackTrace();
         }

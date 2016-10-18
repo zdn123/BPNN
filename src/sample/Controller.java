@@ -29,6 +29,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.*;
+import java.text.DecimalFormat;
 
 public class Controller {
     @FXML
@@ -269,10 +270,12 @@ public class Controller {
         for(int i = 0; i<Main.bpnn.trainErrorlist.size(); i++){
             series.getData().add(new XYChart.Data(i,Main.bpnn.trainErrorlist.get(i)));
         }
+        series.setName("训练曲线");
         lineChart.getData().add(series);
 
         if(Main.bpnn.testrate!=0){
             XYChart.Series testSeries=new XYChart.Series();
+            testSeries.setName("测试曲线");
             for(int i=0;i<Main.bpnn.testErrorlist.size();i++){
                 testSeries.getData().add(new XYChart.Data(i,Main.bpnn.testErrorlist.get(i)));
             }
@@ -332,7 +335,10 @@ public class Controller {
         expressionText.setText("x0=uniform(1,10);\n" +
                 "x1=uniform(2,8);\n" +
                 "y0=x0+x1;\n" +
-                "y1=x0-x1;");
+                "y1=x0-x1;\n" +
+                "y0+=Math.random()*2\n" +
+                "y1+=Math.random()");
+        tabPane.getSelectionModel().select(4);
     }
     class TestData{
         public SimpleDoubleProperty[] doubleProperties;
@@ -361,19 +367,18 @@ public class Controller {
     @FXML
     TextField outputCount;
     @FXML
-    TextField noise;
-    @FXML
     TextArea expressionText;
+    @FXML
+    TextArea displayText;
 
     ScriptEngineManager manager;
     ScriptEngine engine;
 
     @FXML
-    void generateDataSet(){
+    void generateDataSet() throws IOException {
         int datacount= Integer.parseInt(dataCount.getText());
         int inputcount=Integer.parseInt(inputCount.getText());
         int outputcount=Integer.parseInt(outputCount.getText());
-        double dnoise=Double.parseDouble(noise.getText());
 
         try {
             engine.eval("function uniform(min,max)\n" +
@@ -394,6 +399,7 @@ public class Controller {
                     "}");
 //            double result=(double)engine.eval("gaussian(10,3)");
             DataSet dataSet=new DataSet(inputcount,outputcount);
+            DecimalFormat df = new DecimalFormat("00000.00");
             for(int i=0;i<datacount;i++){
                 engine.eval(expressionText.getText());
 
@@ -405,7 +411,7 @@ public class Controller {
                 double[] outputs=new double[outputcount];
                 for(int j=0;j<outputcount;j++){
                     double y=(double)engine.get("y"+j);
-                    outputs[j]=y+Main.bpnn.random.nextDouble()*dnoise;
+                    outputs[j]=y;
                 }
                 DataGroup dg=new DataGroup(inputcount,outputcount);
                 dg.inputs=inputs;
@@ -413,19 +419,82 @@ public class Controller {
                 dataSet.trainGroups.add(dg);
             }
 
-            for(int i=0;i<dataSet.trainGroups.size();i++){
-                System.out.print("X= ");
-                for(int j=0;j<dataSet.trainGroups.get(i).inputs.length;j++){
-                    System.out.print(dataSet.trainGroups.get(i).inputs[j]+"\t");
-                }
-                System.out.print("      Y= ")
-                ;for(int j=0;j<dataSet.trainGroups.get(i).outputs.length;j++){
-                    System.out.print(dataSet.trainGroups.get(i).outputs[j]+"\t");
-                }
-                System.out.println();
+            displayText.setText("");
+            String display="";
+            for(int j=0;j<inputcount;j++){
+                display+=("    x"+j+"\t\t");
             }
+            for(int j=0;j<outputcount;j++){
+                display+=("    y"+j+"\t\t");
+            }
+            display+="\n";
+            for(int i=0;i<dataSet.trainGroups.size();i++){
+                for(int j=0;j<dataSet.trainGroups.get(i).inputs.length;j++){
+                    display+=(precossNumber(df.format(dataSet.trainGroups.get(i).inputs[j]))+"\t");
+                }
+                for(int j=0;j<dataSet.trainGroups.get(i).outputs.length;j++){
+                    display+=(precossNumber(df.format(dataSet.trainGroups.get(i).outputs[j]))+"\t");
+                }
+                display+="\n";
+            }
+            displayText.setText(display);
+
+
+//            File trainfile=new File("res/train.txt");//debug
+//            File predictfile=new File("res/predict.txt");
+
+            File trainfile=new File("res/train.txt");//for artifact
+            File predictfile=new File("res/predict.txt");
+            if(!trainfile.exists())
+                trainfile.createNewFile();
+            if(!predictfile.exists())
+                predictfile.createNewFile();
+            FileWriter fileWriter=new FileWriter(trainfile);
+            BufferedWriter bufferedWriter=new BufferedWriter(fileWriter);
+            for(int i=0;i<dataSet.trainGroups.size();i++){
+                for(int j=0;j<dataSet.trainGroups.get(i).inputs.length;j++){
+                    bufferedWriter.write(new Double(dataSet.trainGroups.get(i).inputs[j]).toString());
+                    bufferedWriter.write("\t");
+                }
+                for(int j=0;j<dataSet.trainGroups.get(i).outputs.length;j++){
+                    bufferedWriter.write(new Double(dataSet.trainGroups.get(i).outputs[j]).toString());
+                    bufferedWriter.write("\t");
+                }
+                bufferedWriter.write("\n");
+            }
+            bufferedWriter.close();
+            fileWriter=new FileWriter(predictfile);
+            bufferedWriter=new BufferedWriter(fileWriter);
+            for(int i=0;i<dataSet.trainGroups.size();i+=dataSet.trainGroups.size()/10){
+                for(int j=0;j<dataSet.trainGroups.get(i).inputs.length;j++){
+                    bufferedWriter.write(new Double(dataSet.trainGroups.get(i).inputs[j]).toString());
+                    bufferedWriter.write("\t");
+                }
+                bufferedWriter.write("\n");
+            }
+            bufferedWriter.close();
         } catch (ScriptException e) {
+            displayText.setText(e.getMessage());
             e.printStackTrace();
         }
+
+    }
+    String precossNumber(String str){
+        StringBuffer sb=new StringBuffer(str);
+        int k=0;
+        for(int i=0;i<str.length()-1;i++){
+            if(sb.charAt(i)=='-')
+                continue;
+            if(sb.charAt(i)!='0'||(sb.charAt(i)=='0'&&sb.charAt(i+1)=='.')){
+                break;
+            }
+            sb.setCharAt(i,' ');
+            k++;
+        }
+        if(sb.charAt(0)=='-'){
+            sb.setCharAt(0,' ');
+            sb.setCharAt(k,'-');
+        }
+        return sb.toString();
     }
 }
