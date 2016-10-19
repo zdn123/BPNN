@@ -135,12 +135,12 @@ public class BPNN {
             return null;
 
         double[] Y=new double[nY];
+        double[] newX=X.clone();
+        newX=generateOne(newX);
 
-        X=generateOne(X);
-
-        for(int i=0;i<X.length;i++){
+        for(int i=0;i<newX.length;i++){
             InputNode node = (InputNode) layers[0].nodes[i];
-            node.x=X[i];
+            node.x=newX[i];
         }
 
         for(int layercount=1;layercount<layerNumber;layercount++){

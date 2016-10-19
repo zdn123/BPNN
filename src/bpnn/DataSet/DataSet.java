@@ -76,8 +76,22 @@ public class DataSet {
         this.ominX=minx;
         this.ominY=miny;
 
-        oldtrainGroups= (ArrayList<DataGroup>) trainGroups.clone();
-        oldtestGroups= (ArrayList<DataGroup>) testGroups.clone();
+//        oldtrainGroups= (ArrayList<DataGroup>) trainGroups.clone();
+        for (DataGroup dg: trainGroups) {
+            try {
+                oldtrainGroups.add(dg.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
+//        oldtestGroups= (ArrayList<DataGroup>) testGroups.clone();
+        for (DataGroup dg: testGroups) {
+            try {
+                oldtestGroups.add(dg.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        }
 
         findMaxMin();
         for(int i=0;i<trainGroups.size();i++){
