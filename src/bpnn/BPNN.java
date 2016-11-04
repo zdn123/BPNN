@@ -157,7 +157,7 @@ public class BPNN {
         for(int i=0;i<outputlayer.nodeNumber;i++){
             Y[i]=outputlayer.nodes[i].x;
         }
-        Y=degenerateOne(Y);
+        degenerateOne(Y);
         return Y;
     }
     public double[] generateOne(double[] X){

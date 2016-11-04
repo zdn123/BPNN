@@ -174,8 +174,8 @@ public class DataSet {
                 if(maxX[j]<trainGroups.get(i).inputs[j]){
                     maxX[j]=trainGroups.get(i).inputs[j];
                 }
-                if(minY[j]>trainGroups.get(i).inputs[j]){
-                    minY[j]=trainGroups.get(i).inputs[j];
+                if(minX[j]>trainGroups.get(i).inputs[j]){
+                    minX[j]=trainGroups.get(i).inputs[j];
                 }
             }
             for(int j=0;j<yn;j++){
