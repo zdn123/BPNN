@@ -57,6 +57,8 @@ public class Controller {
     @FXML
     TableView<TestData> compareTable;
     @FXML
+    TableView<PredictData> predictTable;
+    @FXML
     ComboBox testSelect;
 
     LineChart<Number,Number>lineChart;
@@ -92,6 +94,7 @@ public class Controller {
         Main.bpnn=new BPNN(maxIter,minError,netStructure,speed,momentum,activateFunction);
 
         compareTable.getColumns().clear();
+        compareTable.getItems().clear();
         for(int i=0;i<Main.bpnn.xnumber;i++){
             TableColumn tc=new TableColumn("x"+i);
             int finalI = i;
@@ -124,6 +127,52 @@ public class Controller {
             });
             compareTable.getColumns().add(tc1);
         }
+
+        predictTable.getColumns().clear();
+        predictTable.getItems().clear();
+        for(int i=0;i<Main.bpnn.xnumber;i++){
+            TableColumn tc=new TableColumn("x"+i);
+            int finalI = i;
+            tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PredictData,Double>, ObservableValue<Number>>() {
+                @Override
+                public ObservableValue<Number> call(TableColumn.CellDataFeatures<PredictData,Double> param) {
+                    return param.getValue().doubleProperties[finalI];
+                }
+            });
+            predictTable.getColumns().add(tc);
+
+        }
+        for(int i=0;i<Main.bpnn.ynumber;i++){
+            TableColumn tc=new TableColumn("dy"+i);
+            int finalI = i;
+            tc.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PredictData,Double>, ObservableValue<Number>>() {
+                @Override
+                public ObservableValue<Number> call(TableColumn.CellDataFeatures<PredictData,Double> param) {
+                    return param.getValue().doubleProperties[2*finalI+Main.bpnn.xnumber];
+                }
+            });
+            predictTable.getColumns().add(tc);
+
+            TableColumn tc1=new TableColumn("oy"+i);
+            int finalI1 = i;
+            tc1.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PredictData,Double>, ObservableValue<Number>>() {
+                @Override
+                public ObservableValue<Number> call(TableColumn.CellDataFeatures<PredictData,Double> param) {
+                    return param.getValue().doubleProperties[2*finalI1+1+Main.bpnn.xnumber];
+                }
+            });
+            predictTable.getColumns().add(tc1);
+
+            TableColumn tc2=new TableColumn("oy"+i+"-dy"+i);
+            int finalI2 = i;
+            tc2.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<PredictData,Double>, ObservableValue<Number>>() {
+                @Override
+                public ObservableValue<Number> call(TableColumn.CellDataFeatures<PredictData,Double> param) {
+                    return param.getValue().doubleProperties[finalI1+Main.bpnn.xnumber+Main.bpnn.ynumber*2];
+                }
+            });
+            predictTable.getColumns().add(tc2);
+        }
     }
 
 
@@ -133,6 +182,7 @@ public class Controller {
         fileChooser.setTitle("选择训练数据集");
         File file=fileChooser.showOpenDialog(Main.primaryStage);
         train(file);
+        beginDraw();
     }
     @FXML
     public void chooseDefaultSet(){
@@ -142,6 +192,7 @@ public class Controller {
         File file1=new File("res/predict.txt");
         //File file1=new File("predict.txt");//for artifact
         predict(file1);
+        beginDraw();
     }
     void train(File file){
         DataSet dataSet=new DataSet(Main.bpnn.xnumber,Main.bpnn.ynumber);
@@ -201,14 +252,15 @@ public class Controller {
     void choosePredictSet(){
         FileChooser fileChooser=new FileChooser();
         fileChooser.setTitle("选择训练数据集");
-        //File file=fileChooser.showOpenDialog(Main.primaryStage);
-        File file=new File("res/predict.txt");
+        File file=fileChooser.showOpenDialog(Main.primaryStage);
+        //File file=new File("res/predict.txt");
         //File file=new File("predict.txt");//for artifact
         predict(file);
+
     }
 
     void predict(File file){
-        tabPane.getSelectionModel().select(1);
+        tabPane.getSelectionModel().select(5);
         try {
             BufferedReader reader=new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             //-
@@ -217,17 +269,35 @@ public class Controller {
             while((line=reader.readLine())!=null){
                 String[] ss=line.split("\t");
                 double[] X=new double[Main.bpnn.xnumber];
+                double[] dY=new double[Main.bpnn.ynumber];
                 for(int i=0;i<Main.bpnn.xnumber;i++){
                     X[i]=Double.parseDouble(ss[i]);
                 }
-                predictSetTextArea.appendText("X["+linenumber+"]="+line+"\n");
+
+                String xs="X["+linenumber+"]=";
+                for(int i=0;i<Main.bpnn.xnumber;i++){
+                    xs+=(ss[i]+"\t");
+                }
+                predictSetTextArea.appendText(xs+"\n");
+
+                if(ss.length==Main.bpnn.xnumber+Main.bpnn.ynumber){
+                    String dy="dY["+linenumber+"]=";
+                    for(int i=0;i<Main.bpnn.ynumber;i++){
+                        dy+=(ss[Main.bpnn.xnumber+i]+"\t");
+
+                        dY[i]=Double.parseDouble(ss[Main.bpnn.xnumber+i]);
+                    }
+                    predictSetTextArea.appendText(dy+"\n");
+                }
 
                 double[] Y=Main.bpnn.predict(X);
+
+                predictTable.getItems().add(new PredictData(X,dY,Y));
                 String so="";
                 for(int i=0;i<Y.length;i++){
                     so+=(Y[i]+"\t");
                 }
-                predictSetTextArea.appendText("Y["+linenumber+"]="+so+"\n");
+                predictSetTextArea.appendText("oY["+linenumber+"]="+so+"\n");
 
                 linenumber++;
             }
@@ -243,7 +313,6 @@ public class Controller {
         }
     }
 
-    @FXML
     void beginDraw(){
         tabPane.getSelectionModel().select(2);
         XYChart.Series series=new XYChart.Series();
@@ -270,12 +339,12 @@ public class Controller {
         for(int i = 0; i<Main.bpnn.trainErrorlist.size(); i++){
             series.getData().add(new XYChart.Data(i,Main.bpnn.trainErrorlist.get(i)));
         }
-        series.setName("训练曲线");
+        series.setName("训练曲线--最终训练误差: "+Main.bpnn.trainErrorlist.get(Main.bpnn.trainErrorlist.size()-1));
         lineChart.getData().add(series);
 
         if(Main.bpnn.testrate!=0){
             XYChart.Series testSeries=new XYChart.Series();
-            testSeries.setName("测试曲线");
+            testSeries.setName("测试曲线--最终测试误差: "+Main.bpnn.testErrorlist.get(Main.bpnn.testErrorlist.size()-1));
             for(int i=0;i<Main.bpnn.testErrorlist.size();i++){
                 testSeries.getData().add(new XYChart.Data(i,Main.bpnn.testErrorlist.get(i)));
             }
@@ -334,6 +403,7 @@ public class Controller {
         engine=manager.getEngineByName("nashorn");
         expressionText.setText("x0=uniform(1,10);\n" +
                 "x1=uniform(2,8);\n" +
+                "x2=gaussian(10,2);\n" +
                 "y0=x0+x1;\n" +
                 "y1=x0-x1;\n" +
                 "y0+=Math.random()*2\n" +
@@ -356,6 +426,29 @@ public class Controller {
             for(int i=0;i<dataSet.yn;i++){
                 doubleProperties[dataSet.xn+2*i+1]=new SimpleDoubleProperty();
                 doubleProperties[dataSet.xn+2*i+1].set(dataSet.testPredicts.get(n)[i]);
+            }
+        }
+    }
+    class PredictData{
+        public SimpleDoubleProperty[] doubleProperties;
+
+        public PredictData(double[] inputs,double[] doutputs,double[] ooutputs) {
+            this.doubleProperties= new SimpleDoubleProperty[inputs.length + 3 * doutputs.length];
+            for(int i=0;i<inputs.length;i++){
+                doubleProperties[i]=new SimpleDoubleProperty();
+                doubleProperties[i].set(inputs[i]);
+            }
+            for(int i=0;i<doutputs.length;i++){
+                doubleProperties[inputs.length+2*i]=new SimpleDoubleProperty();
+                doubleProperties[inputs.length+2*i].set(doutputs[i]);
+            }
+            for(int i=0;i<doutputs.length;i++){
+                doubleProperties[inputs.length+2*i+1]=new SimpleDoubleProperty();
+                doubleProperties[inputs.length+2*i+1].set(ooutputs[i]);
+            }
+            for(int i=0;i<doutputs.length;i++){
+                doubleProperties[inputs.length+2*doutputs.length+i]=new SimpleDoubleProperty();
+                doubleProperties[inputs.length+2*doutputs.length+i].set(ooutputs[i]-doutputs[i]);
             }
         }
     }

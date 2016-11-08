@@ -15,14 +15,14 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="1027.0" xmlns="http://javafx.com/javafx/8.0.76-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="550.0" prefWidth="1027.0" xmlns="http://javafx.com/javafx/8.0.112-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
       <SplitPane dividerPositions="0.29797979797979796" layoutX="-1.0" prefHeight="550.0" prefWidth="1027.0">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="548.0" prefWidth="381.0">
                <children>
                   <Label layoutX="50.0" layoutY="43.0" text="网络结构：" />
-                  <TextField fx:id="netStructText" layoutX="140.0" layoutY="37.0" text="2-5-5-2" />
+                  <TextField fx:id="netStructText" layoutX="140.0" layoutY="37.0" text="3-5-5-2" />
                   <TextField fx:id="maxIterText" layoutX="140.0" layoutY="87.0" text="5000" />
                   <Label layoutX="14.0" layoutY="93.0" text="最大迭代次数：" />
                   <Label layoutX="50.0" layoutY="144.0" text="最小误差：" />
@@ -31,18 +31,17 @@
                   <TextField fx:id="minErrorText" layoutX="140.0" layoutY="138.0" text="0.002" />
                   <TextField fx:id="speedText" layoutX="140.0" layoutY="189.0" text="0.5" />
                   <TextField fx:id="momentumText" layoutX="140.0" layoutY="236.0" text="0.4" />
-                  <Button fx:id="initButton" layoutX="150.0" layoutY="293.0" mnemonicParsing="false" onAction="#initNet" prefHeight="36.0" prefWidth="109.0" text="初始化网络" />
-                  <Button fx:id="chooseTrainSetButton" layoutX="2.0" layoutY="352.0" mnemonicParsing="false" onMouseClicked="#chooseTrainSet" prefHeight="36.0" prefWidth="109.0" text="选择训练数据集" />
-                  <Button layoutX="2.0" layoutY="410.0" mnemonicParsing="false" onMouseClicked="#choosePredictSet" prefHeight="36.0" prefWidth="109.0" text="选择预测数据集" />
-                  <Button layoutX="67.0" layoutY="479.0" mnemonicParsing="false" onMouseClicked="#beginDraw" prefHeight="36.0" prefWidth="109.0" text="开始绘图" />
+                  <Button fx:id="initButton" layoutX="150.0" layoutY="316.0" mnemonicParsing="false" onAction="#initNet" prefHeight="36.0" prefWidth="109.0" text="初始化网络" />
+                  <Button fx:id="chooseTrainSetButton" layoutX="2.0" layoutY="388.0" mnemonicParsing="false" onMouseClicked="#chooseTrainSet" prefHeight="36.0" prefWidth="109.0" text="选择训练数据集" />
+                  <Button layoutX="2.0" layoutY="452.0" mnemonicParsing="false" onMouseClicked="#choosePredictSet" prefHeight="36.0" prefWidth="109.0" text="选择预测数据集" />
                   <Label layoutX="140.0" layoutY="14.0" prefHeight="24.0" prefWidth="72.0" text="例：2-3-2" textFill="#c64e4e">
                      <font>
                         <Font size="10.0" />
                      </font>
                   </Label>
-                  <ComboBox fx:id="activateChoose" layoutX="2.0" layoutY="293.0" prefHeight="36.0" prefWidth="109.0" promptText="激活函数" />
-                  <Button layoutX="150.0" layoutY="410.0" mnemonicParsing="false" onMouseClicked="#chooseDefaultSet" prefHeight="36.0" prefWidth="109.0" text="加载默认数据集" />
-                  <ComboBox fx:id="testSelect" layoutX="150.0" layoutY="352.0" prefHeight="36.0" prefWidth="109.0" promptText="测试比例" />
+                  <ComboBox fx:id="activateChoose" layoutX="2.0" layoutY="316.0" prefHeight="36.0" prefWidth="109.0" promptText="激活函数" />
+                  <Button layoutX="150.0" layoutY="452.0" mnemonicParsing="false" onMouseClicked="#chooseDefaultSet" prefHeight="36.0" prefWidth="109.0" text="加载默认数据集" />
+                  <ComboBox fx:id="testSelect" layoutX="150.0" layoutY="388.0" prefHeight="36.0" prefWidth="109.0" promptText="测试比例" />
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
@@ -90,7 +89,7 @@
                           <AnchorPane fx:id="errorLineChartPane" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
                         </content>
                       </Tab>
-                        <Tab closable="false" text="对比图">
+                        <Tab closable="false" text="对比表">
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
@@ -109,7 +108,7 @@
                                  <children>
                                     <TextField fx:id="dataCount" layoutX="150.0" layoutY="26.0" text="100" />
                                     <TextArea fx:id="expressionText" layoutX="403.0" layoutY="14.0" prefHeight="200.0" prefWidth="300.0" />
-                                    <TextField fx:id="inputCount" layoutX="150.0" layoutY="96.0" text="2" />
+                                    <TextField fx:id="inputCount" layoutX="150.0" layoutY="96.0" text="3" />
                                     <TextField fx:id="outputCount" layoutX="150.0" layoutY="170.0" text="2" />
                                     <Label layoutX="14.0" layoutY="32.0" text="数据个数：" />
                                     <Label layoutX="14.0" layoutY="102.0" text="输入数量：" />
@@ -120,6 +119,19 @@
                                           <Font name="Arial" size="18.0" />
                                        </font></TextArea>
                                  </children></AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab closable="false" text="预测表">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <children>
+                                        <TableView fx:id="predictTable" layoutY="-1.0" prefHeight="501.0" prefWidth="715.0">
+                                            <columns>
+                                                <TableColumn prefWidth="75.0" text="C1" />
+                                                <TableColumn prefWidth="75.0" text="C2" />
+                                            </columns>
+                                        </TableView>
+                                    </children></AnchorPane>
                             </content>
                         </Tab>
                     </tabs>

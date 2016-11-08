@@ -119,7 +119,7 @@ public class BPNN {
             testError/=(dataSet.testGroups.size()*2.0);
             testErrorlist.add(testError);
 
-            System.out.println(trainError);
+            //System.out.println(trainError);
             //然后刷新网络的结构
             //refreshNet();
 
