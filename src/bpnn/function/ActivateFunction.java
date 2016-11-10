@@ -1,7 +1,7 @@
 package bpnn.function;
 
 /**
- * Created by zsh96 on 2016/10/1.
+ * Created by zsh_o on 2016/10/1.
  * 激活函数接口
  */
 public interface ActivateFunction {

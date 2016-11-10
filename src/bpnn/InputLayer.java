@@ -1,7 +1,7 @@
 package bpnn;
 
 /**
- * Created by zsh96 on 2016/10/1.
+ * Created by zsh_o on 2016/10/1.
  */
 public class InputLayer extends Layer{
     public InputLayer(int nodeNumber, int layerCount) {

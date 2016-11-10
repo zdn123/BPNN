@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Created by zsh96 on 2016/10/1.
+ * Created by zsh_o on 2016/10/1.
  */
 public class DataSet {
     public ArrayList<DataGroup> trainGroups;

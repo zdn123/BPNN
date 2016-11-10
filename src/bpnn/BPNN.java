@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * Created by zsh96 on 2016/10/1.
+ * Created by zsh_o on 2016/10/1.
  */
 public class BPNN {
     public static Random random=new Random(System.currentTimeMillis());

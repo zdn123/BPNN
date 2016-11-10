@@ -3,7 +3,7 @@ package bpnn.Util;
 import bpnn.DataSet.DataSet;
 
 /**
- * Created by zsh96 on 2016/10/1.
+ * Created by zsh_o on 2016/10/1.
  */
 public class Util {
     public static double dot(double[] X,double[] Y) throws Exception {

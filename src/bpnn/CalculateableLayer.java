@@ -3,7 +3,7 @@ package bpnn;
 import bpnn.function.ActivateFunction;
 
 /**
- * Created by zsh96 on 2016/10/1.
+ * Created by zsh_o on 2016/10/1.
  */
 public class CalculateableLayer extends Layer {
     ActivateFunction activateFunction;

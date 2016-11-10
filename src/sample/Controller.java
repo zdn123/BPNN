@@ -456,6 +456,8 @@ public class Controller {
     @FXML
     TextField dataCount;
     @FXML
+    TextField predictDataCount;
+    @FXML
     TextField inputCount;
     @FXML
     TextField outputCount;
@@ -470,6 +472,7 @@ public class Controller {
     @FXML
     void generateDataSet() throws IOException {
         int datacount= Integer.parseInt(dataCount.getText());
+        int predictcount=Integer.parseInt(predictDataCount.getText());
         int inputcount=Integer.parseInt(inputCount.getText());
         int outputcount=Integer.parseInt(outputCount.getText());
 
@@ -510,6 +513,26 @@ public class Controller {
                 dg.inputs=inputs;
                 dg.outputs=outputs;
                 dataSet.trainGroups.add(dg);
+            }
+
+            DataSet predictdDataSet=new DataSet(inputcount,outputcount);
+            for(int i=0;i<predictcount;i++){
+                engine.eval(expressionText.getText());
+
+                double[] inputs=new double[inputcount];
+                for(int j=0;j<inputcount;j++){
+                    double x= (double) engine.get("x"+j);
+                    inputs[j]=x;
+                }
+                double[] outputs=new double[outputcount];
+                for(int j=0;j<outputcount;j++){
+                    double y=(double)engine.get("y"+j);
+                    outputs[j]=y;
+                }
+                DataGroup dg=new DataGroup(inputcount,outputcount);
+                dg.inputs=inputs;
+                dg.outputs=outputs;
+                predictdDataSet.trainGroups.add(dg);
             }
 
             displayText.setText("");
@@ -558,9 +581,13 @@ public class Controller {
             bufferedWriter.close();
             fileWriter=new FileWriter(predictfile);
             bufferedWriter=new BufferedWriter(fileWriter);
-            for(int i=0;i<dataSet.trainGroups.size();i+=dataSet.trainGroups.size()/10){
-                for(int j=0;j<dataSet.trainGroups.get(i).inputs.length;j++){
-                    bufferedWriter.write(new Double(dataSet.trainGroups.get(i).inputs[j]).toString());
+            for(int i=0;i<predictdDataSet.trainGroups.size();i++){
+                for(int j=0;j<predictdDataSet.trainGroups.get(i).inputs.length;j++){
+                    bufferedWriter.write(new Double(predictdDataSet.trainGroups.get(i).inputs[j]).toString());
+                    bufferedWriter.write("\t");
+                }
+                for(int j=0;j<dataSet.trainGroups.get(i).outputs.length;j++){
+                    bufferedWriter.write(new Double(predictdDataSet.trainGroups.get(i).outputs[j]).toString());
                     bufferedWriter.write("\t");
                 }
                 bufferedWriter.write("\n");
